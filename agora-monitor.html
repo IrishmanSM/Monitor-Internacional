@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor Global · Ágora Asset Management</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap');
+
+  :root {
+    --navy: #0A192F;
+    --gold: #D4AF37;
+    --gold-dim: rgba(212,175,55,0.18);
+    --gold-line: rgba(212,175,55,0.35);
+    --white: #FFFFFF;
+    --text: #E8EDF3;
+    --text-muted: #8899AA;
+    --green: #3DD68C;
+    --red: #F76B6B;
+    --green-dim: rgba(61,214,140,0.10);
+    --red-dim: rgba(247,107,107,0.10);
+    --card: rgba(17,34,64,0.8);
+    --border: rgba(212,175,55,0.13);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--navy);
+    color: var(--text);
+    font-family: 'Lato', sans-serif;
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 60% 40% at 80% 5%, rgba(212,175,55,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 50% at 10% 90%, rgba(29,53,87,0.4) 0%, transparent 60%);
+  }
+
+  /* ── HEADER ─────────────────────────────── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 32px 13px;
+    border-bottom: 1px solid var(--border);
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(10,25,47,0.97);
+    backdrop-filter: blur(12px);
+  }
+  .logo-area { display: flex; align-items: center; gap: 12px; }
+  .brand-name { font-family: 'Playfair Display', serif; font-size: 1.05rem; font-weight: 600; letter-spacing: .07em; color: var(--white); }
+  .brand-sub { font-size: .6rem; letter-spacing: .18em; color: var(--gold); text-transform: uppercase; display: block; margin-top: 1px; font-weight: 300; }
+  .header-right { display: flex; align-items: center; gap: 14px; }
+  .last-update { font-size: .68rem; color: var(--text-muted); }
+  .pulse { display: inline-block; width: 6px; height: 6px; background: var(--green); border-radius: 50%; margin-right: 5px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.7)} }
+  #refresh-btn {
+    background: var(--gold-dim); border: 1px solid var(--gold-line); color: var(--gold);
+    font-family: 'Lato', sans-serif; font-size: .68rem; letter-spacing: .1em;
+    text-transform: uppercase; padding: 6px 14px; border-radius: 3px; cursor: pointer; transition: background .2s;
+  }
+  #refresh-btn:hover { background: rgba(212,175,55,.28); }
+  #refresh-btn:disabled { opacity: .35; cursor: not-allowed; }
+
+  /* ── MAIN ───────────────────────────────── */
+  main { padding: 20px 32px 48px; max-width: 1600px; margin: 0 auto; }
+
+  /* ── SECTION LABEL ──────────────────────── */
+  .section-label {
+    font-size: .6rem; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700; margin-bottom: 10px; margin-top: 26px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-label::after { content:''; flex:1; height:1px; background:var(--border); }
+
+  /* ── GRIDS ──────────────────────────────── */
+  .grid-2  { display: grid; grid-template-columns: repeat(2,1fr);  gap: 8px; }
+  .grid-3  { display: grid; grid-template-columns: repeat(3,1fr);  gap: 8px; }
+  .grid-4  { display: grid; grid-template-columns: repeat(4,1fr);  gap: 8px; }
+  .grid-5  { display: grid; grid-template-columns: repeat(5,1fr);  gap: 8px; }
+  .grid-6  { display: grid; grid-template-columns: repeat(6,1fr);  gap: 8px; }
+  .grid-8  { display: grid; grid-template-columns: repeat(8,1fr);  gap: 8px; }
+  .grid-11 { display: grid; grid-template-columns: repeat(11,1fr); gap: 8px; }
+
+  /* ── ROW LAYOUT (two panels side by side) ─ */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+
+  /* ── CARD ───────────────────────────────── */
+  .card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 5px;
+    padding: 11px 13px; position: relative; overflow: hidden; transition: border-color .2s;
+  }
+  .card:hover { border-color: var(--gold-line); }
+  .card::before { content:''; position:absolute; left:0;top:0;bottom:0; width:3px; background:var(--gold); opacity:0; transition:opacity .2s; }
+  .card:hover::before { opacity:1; }
+  .card.up-bg   { background: linear-gradient(135deg, var(--card), rgba(61,214,140,0.06)); }
+  .card.down-bg { background: linear-gradient(135deg, var(--card), rgba(247,107,107,0.06)); }
+
+  .card-ticker { font-size: .6rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 2px; }
+  .card-name   { font-size: .63rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 300; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card-price  { font-size: 1.0rem; font-weight: 700; color: var(--white); letter-spacing: -.01em; margin-bottom: 3px; font-variant-numeric: tabular-nums; }
+  .card-change { font-size: .72rem; font-weight: 700; letter-spacing: .02em; font-variant-numeric: tabular-nums; }
+  .card-change.up   { color: var(--green); }
+  .card-change.down { color: var(--red); }
+  .card-change.flat { color: var(--text-muted); }
+  .card-abs { font-size: .6rem; color: var(--text-muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .src { font-size: .5rem; color: rgba(136,153,170,.4); letter-spacing: .06em; text-transform: uppercase; margin-top: 2px; }
+
+  /* ── MACRO CARD ─────────────────────────── */
+  .macro-card { background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 13px 15px; }
+  .macro-label { font-size: .58rem; letter-spacing: .15em; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 4px; }
+  .macro-value { font-size: 1.2rem; font-weight: 700; color: var(--white); font-variant-numeric: tabular-nums; }
+  .macro-sub   { font-size: .65rem; color: var(--text-muted); font-weight: 300; margin-top: 2px; }
+
+  /* ── YIELD SECTION ──────────────────────── */
+  .yield-wrap { display: grid; grid-template-columns: 1fr 240px; gap: 8px; }
+  .yield-box  { background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 14px 16px; }
+  .yield-title{ font-size: .58rem; letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); font-weight: 700; margin-bottom: 12px; }
+  .yield-row  { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .yield-tenor{ font-size: .6rem; color: var(--text-muted); width: 28px; text-align: right; }
+  .yield-bar-wrap { flex:1; height:4px; background:rgba(255,255,255,.05); border-radius:2px; overflow:hidden; }
+  .yield-bar-fill { height:100%; background: linear-gradient(90deg,var(--gold),rgba(212,175,55,.4)); border-radius:2px; transition:width .8s ease; }
+  .yield-val  { font-size: .76rem; font-weight: 700; color: var(--white); width: 40px; font-variant-numeric: tabular-nums; }
+  .yield-chg  { font-size: .62rem; width: 46px; font-variant-numeric: tabular-nums; }
+
+  .vix-box    { background: var(--card); border: 1px solid var(--border); border-radius: 5px; padding: 14px 16px; display:flex; flex-direction:column; justify-content:space-between; }
+  .vix-track  { height:6px; border-radius:3px; background:linear-gradient(90deg,var(--green) 0%,#FFD700 40%,#FF8C00 65%,var(--red) 100%); position:relative; margin:8px 0 5px; }
+  .vix-needle { position:absolute;top:-4px;width:3px;height:14px;background:white;border-radius:2px;transform:translateX(-50%);transition:left .8s ease;box-shadow:0 0 4px rgba(255,255,255,.7); }
+  .vix-labels { display:flex;justify-content:space-between;font-size:.55rem;color:var(--text-muted); }
+
+  /* ── LOADING ─────────────────────────────── */
+  .loading-overlay { position:fixed;inset:0;background:rgba(10,25,47,.94);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px; }
+  .loading-overlay.hidden { display:none; }
+  .spinner { width:36px;height:36px;border:2px solid var(--gold-dim);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite; }
+  @keyframes spin { to{transform:rotate(360deg)} }
+  .loading-text { font-family:'Playfair Display',serif;font-size:.85rem;color:var(--text-muted);letter-spacing:.07em; }
+
+  footer { text-align:center;padding:16px 32px;border-top:1px solid var(--border);font-size:.6rem;color:var(--text-muted);letter-spacing:.06em;margin-top:20px; }
+  footer span { color:var(--gold); }
+
+  @media(max-width:1200px){
+    .grid-11{grid-template-columns:repeat(6,1fr)}
+    .grid-8{grid-template-columns:repeat(4,1fr)}
+    .grid-6{grid-template-columns:repeat(3,1fr)}
+    .three-col{grid-template-columns:1fr 1fr}
+    .yield-wrap{grid-template-columns:1fr}
+  }
+  @media(max-width:800px){
+    main{padding:12px}
+    .grid-11,.grid-8,.grid-6,.grid-5,.grid-4,.grid-3{grid-template-columns:repeat(2,1fr)}
+    .two-col,.three-col{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading">
+  <svg width="34" height="34" viewBox="0 0 36 36" fill="none">
+    <polygon points="18,2 34,31 2,31" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+    <polygon points="18,9 28,28 8,28" fill="rgba(212,175,55,0.15)"/>
+  </svg>
+  <div class="spinner"></div>
+  <div class="loading-text">Cargando datos de mercado…</div>
+</div>
+
+<header>
+  <div class="logo-area">
+    <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+      <polygon points="18,2 34,31 2,31" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+      <polygon points="18,9 28,28 8,28" fill="rgba(212,175,55,0.15)"/>
+    </svg>
+    <div>
+      <div class="brand-name">Ágora Asset Management</div>
+      <span class="brand-sub">Monitor Global de Mercados</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="last-update"><span class="pulse"></span><span id="update-time">Actualizando…</span></div>
+    <button id="refresh-btn" onclick="loadAll()">↻ Actualizar</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- ── MACRO FLASH ── -->
+  <div class="section-label">Macro Flash</div>
+  <div class="grid-4">
+    <div class="macro-card">
+      <div class="macro-label">Fed Funds Rate</div>
+      <div class="macro-value">4.25–4.50%</div>
+      <div class="macro-sub">Tasa objetivo actual</div>
+    </div>
+    <div class="macro-card">
+      <div class="macro-label">CPI USA (interanual)</div>
+      <div class="macro-value">2.4%</div>
+      <div class="macro-sub">Mayo 2025</div>
+    </div>
+    <div class="macro-card">
+      <div class="macro-label">Próxima reunión FOMC</div>
+      <div class="macro-value" style="font-size:.92rem;margin-top:3px">29–30 Jul 2025</div>
+      <div class="macro-sub">Federal Reserve</div>
+    </div>
+    <div class="macro-card">
+      <div class="macro-label">DXY · Índice Dólar</div>
+      <div class="macro-value" id="dxy-val">—</div>
+      <div class="macro-sub" id="dxy-sub">vs canasta de monedas</div>
+    </div>
+  </div>
+
+  <!-- ── ÍNDICES + VIX ── -->
+  <div class="section-label">Índices Globales & Volatilidad</div>
+  <div class="grid-6" id="indices-grid">
+    <!-- SPY QQQ DIA + Euro Stoxx Nikkei + VIX -->
+  </div>
+
+  <!-- ── TASAS UST ── -->
+  <div class="section-label">Tasas · Treasuries USA</div>
+  <div class="yield-wrap">
+    <div class="yield-box">
+      <div class="yield-title">Curva de rendimientos UST</div>
+      <div id="yield-rows"></div>
+      <div id="spread-row"></div>
+    </div>
+    <div class="vix-box">
+      <div>
+        <div class="macro-label">VIX · Fear Index</div>
+        <div class="macro-value" id="vix-val" style="font-size:1.8rem;margin-top:5px">—</div>
+        <div id="vix-label" class="macro-sub" style="margin-top:2px">—</div>
+      </div>
+      <div>
+        <div class="vix-track"><div class="vix-needle" id="vix-needle" style="left:20%"></div></div>
+        <div class="vix-labels"><span>Calma</span><span>Moderado</span><span>Estrés</span><span>Pánico</span></div>
+      </div>
+      <div>
+        <div class="macro-label" style="margin-bottom:2px">Spread 2s10s</div>
+        <div id="spread-val" style="font-size:.95rem;font-weight:700;color:var(--white)">—</div>
+        <div class="macro-sub">Curva de rendimientos</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── COMMODITIES ── -->
+  <div class="section-label">Commodities</div>
+  <div class="grid-5" id="comm-grid"></div>
+
+  <!-- ── DIVISAS ── -->
+  <div class="section-label">Divisas</div>
+  <div class="grid-4" id="fx-grid"></div>
+
+  <!-- ── CRYPTO ── -->
+  <div class="section-label">Crypto</div>
+  <div class="grid-4" id="crypto-grid"></div>
+
+  <!-- ── GROWTH ── -->
+  <div class="section-label">Growth</div>
+  <div class="grid-8" id="growth-grid"></div>
+
+  <!-- ── IA / SEMIS ── -->
+  <div class="section-label">Inteligencia Artificial & Semiconductores</div>
+  <div class="grid-6" id="ia-grid"></div>
+
+  <!-- ── VALUE ── -->
+  <div class="section-label">Value</div>
+  <div class="grid-8" id="value-grid"></div> <!-- BRK.B BAC DIS HD JPM KO NKE PEP WMT -->
+
+  <!-- ── SECTORES ── -->
+  <div class="section-label">Sectores (ETFs)</div>
+  <div class="grid-11" id="sectors-grid"></div>
+
+</main>
+
+<footer>
+  Ágora Asset Management · CNV AP N° 2244 · <span>Monitor informativo.</span> No constituye asesoramiento de inversión. Datos: Finnhub & Financial Modeling Prep. Pueden presentar demoras.
+</footer>
+
+<script>
+// ─── KEYS ────────────────────────────────────────────────────────────────────
+const FH_KEY  = 'd8tsf91r01qhcnk68a20d8tsf91r01qhcnk68a2g';
+const FMP_KEY = '176XljiInOvAT7YHyYOKPnHSgxWJqZ40';
+const FMP_URL = 'https://financialmodelingprep.com/api/v3';
+const FH_URL  = 'https://finnhub.io/api/v1';
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+function fmt(n, dec=2) {
+  if (n == null || isNaN(n)) return '—';
+  return new Intl.NumberFormat('es-AR', {minimumFractionDigits:dec, maximumFractionDigits:dec}).format(n);
+}
+function fmtPct(n) {
+  if (n == null || isNaN(n)) return '—';
+  return (n >= 0 ? '+' : '') + fmt(n,2) + '%';
+}
+function dir(n) {
+  if (n == null || isNaN(n)) return 'flat';
+  return n > 0.01 ? 'up' : n < -0.01 ? 'down' : 'flat';
+}
+function arrow(n) {
+  if (n == null) return '';
+  return n > 0.01 ? '▲ ' : n < -0.01 ? '▼ ' : '— ';
+}
+
+// ─── CARD ────────────────────────────────────────────────────────────────────
+function card(ticker, name, price, chgPct, chgAbs) {
+  const d = dir(chgPct);
+  const decimals = price != null && price < 10 ? 4 : 2;
+  const p = price != null ? fmt(price, decimals) : '—';
+  const abs = chgAbs != null ? ((chgAbs >= 0 ? '+' : '') + fmt(chgAbs, 2)) : '';
+  return `<div class="card ${d}-bg">
+    <div class="card-ticker">${ticker}</div>
+    <div class="card-name">${name}</div>
+    <div class="card-price">${p}</div>
+    <div class="card-change ${d}">${arrow(chgPct)}${fmtPct(chgPct)}</div>
+    ${abs ? `<div class="card-abs">${abs}</div>` : ''}
+  </div>`;
+}
+
+// ─── FMP BATCH QUOTE ─────────────────────────────────────────────────────────
+async function fmpQ(symbols) {
+  if (!symbols.length) return {};
+  try {
+    const r = await fetch(`${FMP_URL}/quote/${symbols.join(',')}?apikey=${FMP_KEY}`);
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    const map = {};
+    for (const q of (Array.isArray(data) ? data : [])) map[q.symbol] = q;
+    return map;
+  } catch(e) { return {}; }
+}
+
+// ─── FINNHUB SINGLE QUOTE ────────────────────────────────────────────────────
+async function fhQ(sym) {
+  try {
+    const r = await fetch(`${FH_URL}/quote?symbol=${encodeURIComponent(sym)}&token=${FH_KEY}`);
+    if (!r.ok) throw new Error(r.status);
+    const d = await r.json();
+    if (!d.c) return null;
+    return { price:d.c, chgPct:d.dp, chgAbs:d.d };
+  } catch(e) { return null; }
+}
+
+// ─── RENDER HELPER ───────────────────────────────────────────────────────────
+function renderGrid(id, cfgList, map) {
+  document.getElementById(id).innerHTML = cfgList.map(c => {
+    const q = map[c.sym];
+    return card(c.label, c.name, q?.price ?? q?.c, q?.changesPercentage ?? q?.dp, q?.change ?? q?.d);
+  }).join('');
+}
+
+// ─── DATA CONFIG ─────────────────────────────────────────────────────────────
+const CFG = {
+  indices: [
+    {sym:'SPY',   label:'SPY',   name:'S&P 500 ETF'},
+    {sym:'QQQ',   label:'QQQ',   name:'Nasdaq ETF'},
+    {sym:'DIA',   label:'DIA',   name:'Dow Jones ETF'},
+    {sym:'^STOXX50E', label:'STOXX50', name:'Euro Stoxx 50'},
+    {sym:'^N225', label:'Nikkei',name:'Nikkei 225'},
+    {sym:'^VIX',  label:'VIX',   name:'Volatilidad'},
+  ],
+  commodities: [
+    {sym:'GCUSD', label:'Oro',   name:'USD / oz'},
+    {sym:'CLUSD', label:'WTI',   name:'Petróleo USD/bbl'},
+    {sym:'BZUSD', label:'Brent', name:'Petróleo USD/bbl'},
+    {sym:'ZSUSD', label:'Soja',  name:'USD / bushel'},
+    {sym:'SIUSD', label:'Plata', name:'USD / oz'},
+  ],
+  fx: [
+    {sym:'EURUSD', label:'EUR/USD', name:'Euro / Dólar'},
+    {sym:'GBPUSD', label:'GBP/USD', name:'Libra / Dólar'},
+    {sym:'USDJPY', label:'USD/JPY', name:'Dólar / Yen'},
+    {sym:'USDBRL', label:'USD/BRL', name:'Dólar / Real'},
+  ],
+  crypto: [
+    {sym:'BTCUSD', label:'BTC',  name:'Bitcoin'},
+    {sym:'ETHUSD', label:'ETH',  name:'Ethereum'},
+    {sym:'SOLUSD', label:'SOL',  name:'Solana'},
+    {sym:'XRPUSD', label:'XRP',  name:'Ripple'},
+  ],
+  growth: [
+    {sym:'NVDA',  label:'NVDA',  name:'Nvidia'},
+    {sym:'AAPL',  label:'AAPL',  name:'Apple'},
+    {sym:'GOOGL', label:'GOOGL', name:'Alphabet'},
+    {sym:'MSFT',  label:'MSFT',  name:'Microsoft'},
+    {sym:'AMZN',  label:'AMZN',  name:'Amazon'},
+    {sym:'META',  label:'META',  name:'Meta'},
+    {sym:'TSLA',  label:'TSLA',  name:'Tesla'},
+    {sym:'SPCX',  label:'SPCX',  name:'SpaceX'},
+  ],
+  ia: [
+    {sym:'SMH',   label:'SMH',   name:'ETF Semiconductores'},
+    {sym:'MU',    label:'MU',    name:'Micron'},
+    {sym:'TSM',   label:'TSM',   name:'Taiwan Semi'},
+    {sym:'AMD',   label:'AMD',   name:'Adv. Micro Devices'},
+    {sym:'INTC',  label:'INTC',  name:'Intel'},
+    {sym:'ASML',  label:'ASML',  name:'ASML Holding'},
+  ],
+  value: [
+    {sym:'BRK-B', label:'BRK.B', name:'Berkshire Hathaway'},
+    {sym:'BAC',   label:'BAC',   name:'Bank of America'},
+    {sym:'DIS',   label:'DIS',   name:'Disney'},
+    {sym:'HD',    label:'HD',    name:'Home Depot'},
+    {sym:'JPM',   label:'JPM',   name:'JP Morgan'},
+    {sym:'KO',    label:'KO',    name:'Coca-Cola'},
+    {sym:'NKE',   label:'NKE',   name:'Nike'},
+    {sym:'PEP',   label:'PEP',   name:'Pepsico'},
+    {sym:'WMT',   label:'WMT',   name:'Walmart'},
+  ],
+  sectors: [
+    {sym:'XLK',  label:'XLK',  name:'Tecnología'},
+    {sym:'XLY',  label:'XLY',  name:'Consumo Discr.'},
+    {sym:'XLB',  label:'XLB',  name:'Materiales'},
+    {sym:'XLI',  label:'XLI',  name:'Industrial'},
+    {sym:'XLV',  label:'XLV',  name:'Salud'},
+    {sym:'XLU',  label:'XLU',  name:'Utilities'},
+    {sym:'XLP',  label:'XLP',  name:'Consumo Básico'},
+    {sym:'XLE',  label:'XLE',  name:'Energía'},
+    {sym:'XLF',  label:'XLF',  name:'Financiero'},
+    {sym:'XLRE', label:'XLRE', name:'Real Estate'},
+    {sym:'XLC',  label:'XLC',  name:'Comunicación'},
+  ],
+  yields: [
+    {label:'3M',  sym:'^IRX'},
+    {label:'2Y',  sym:'^TUS'},
+    {label:'5Y',  sym:'^FVX'},
+    {label:'10Y', sym:'^TNX'},
+    {label:'30Y', sym:'^TYX'},
+  ],
+};
+
+// ─── YIELDS ──────────────────────────────────────────────────────────────────
+async function loadYields() {
+  const syms = CFG.yields.map(y => y.sym);
+  const map  = await fmpQ(syms);
+  const vals = syms.map(s => map[s]?.price ?? null);
+  const maxV = Math.max(...vals.filter(Boolean));
+
+  document.getElementById('yield-rows').innerHTML = CFG.yields.map((y, i) => {
+    const v   = vals[i];
+    const pct = maxV > 0 && v != null ? (v / maxV * 100) : 0;
+    const chgPct = map[syms[i]]?.changesPercentage;
+    const d = dir(chgPct);
+    return `<div class="yield-row">
+      <div class="yield-tenor">${y.label}</div>
+      <div class="yield-bar-wrap"><div class="yield-bar-fill" style="width:${pct}%"></div></div>
+      <div class="yield-val">${v != null ? fmt(v,2)+'%' : '—'}</div>
+      <span class="yield-chg card-change ${d}">${v != null ? fmtPct(chgPct) : ''}</span>
+    </div>`;
+  }).join('');
+
+  const y2 = vals[1], y10 = vals[3];
+  if (y2 != null && y10 != null) {
+    const spread = (y10 - y2) * 100;
+    const d = dir(spread);
+    document.getElementById('spread-row').innerHTML =
+      `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);font-weight:700">Spread 2s10s</span>
+        <span class="card-change ${d}" style="font-size:.85rem">${spread >= 0?'+':''}${fmt(spread,0)} pb</span>
+      </div>`;
+    const sv = document.getElementById('spread-val');
+    sv.textContent = (spread >= 0?'+':'') + fmt(spread,0) + ' pb';
+    sv.className = 'card-change ' + d;
+    sv.style.fontSize = '.95rem';
+  }
+}
+
+// ─── VIX ─────────────────────────────────────────────────────────────────────
+async function loadVIX(map) {
+  const q = map['^VIX'];
+  if (!q) return;
+  const v = q.price;
+  document.getElementById('vix-val').textContent = fmt(v,1);
+  const label = v < 15 ? '😌 Mercado calmo'
+    : v < 20 ? '🟡 Volatilidad moderada'
+    : v < 30 ? '🟠 Estrés de mercado'
+    : '🔴 Alta volatilidad — Pánico';
+  const d = dir(q.changesPercentage);
+  document.getElementById('vix-label').textContent = label;
+  document.getElementById('vix-label').className = 'macro-sub card-change ' + d;
+  const pct = Math.min(100, Math.max(0, (v - 10) / 40 * 100));
+  document.getElementById('vix-needle').style.left = pct + '%';
+}
+
+// ─── DXY ─────────────────────────────────────────────────────────────────────
+async function loadDXY() {
+  const map = await fmpQ(['DX-Y.NYB']);
+  const q   = map['DX-Y.NYB'];
+  if (q) {
+    document.getElementById('dxy-val').textContent = fmt(q.price, 2);
+    const d = dir(q.changesPercentage);
+    document.getElementById('dxy-sub').innerHTML =
+      `<span class="card-change ${d}" style="font-size:.7rem">${arrow(q.changesPercentage)}${fmtPct(q.changesPercentage)}</span>`;
+  }
+}
+
+// ─── CRYPTO (Finnhub) ─────────────────────────────────────────────────────────
+async function loadCrypto() {
+  const cfg = CFG.crypto;
+  const results = await Promise.all(cfg.map(c => fhQ(`BINANCE:${c.sym}`)));
+  // fallback to FMP if Finnhub returns null
+  const syms = cfg.map(c => c.sym);
+  const fmpMap = await fmpQ(syms);
+  document.getElementById('crypto-grid').innerHTML = cfg.map((c, i) => {
+    const fh = results[i];
+    const fm = fmpMap[c.sym];
+    const price    = fh?.price    ?? fm?.price;
+    const chgPct   = fh?.chgPct   ?? fm?.changesPercentage;
+    const chgAbs   = fh?.chgAbs   ?? fm?.change;
+    return card(c.label, c.name, price, chgPct, chgAbs);
+  }).join('');
+}
+
+// ─── MAIN LOAD ────────────────────────────────────────────────────────────────
+async function loadAll() {
+  const btn = document.getElementById('refresh-btn');
+  btn.disabled = true; btn.textContent = '↻ Cargando…';
+  document.getElementById('loading').classList.remove('hidden');
+
+  // Batch all FMP calls
+  const allFmpSyms = [
+    ...CFG.indices.map(c=>c.sym),
+    ...CFG.commodities.map(c=>c.sym),
+    ...CFG.fx.map(c=>c.sym),
+    ...CFG.growth.map(c=>c.sym),
+    ...CFG.ia.map(c=>c.sym),
+    ...CFG.value.map(c=>c.sym),
+    ...CFG.sectors.map(c=>c.sym),
+    'DX-Y.NYB',
+  ];
+
+  // FMP has a limit on how many per call — split into chunks of 20
+  async function fmpChunk(syms) {
+    const chunks = [];
+    for (let i=0; i<syms.length; i+=20) chunks.push(syms.slice(i,i+20));
+    const maps = await Promise.all(chunks.map(fmpQ));
+    return Object.assign({}, ...maps);
+  }
+
+  const [bigMap] = await Promise.all([
+    fmpChunk(allFmpSyms),
+  ]);
+
+  // Render all FMP-based sections
+  renderGrid('indices-grid', CFG.indices, bigMap);
+  renderGrid('comm-grid',    CFG.commodities, bigMap);
+  renderGrid('fx-grid',      CFG.fx, bigMap);
+  renderGrid('growth-grid',  CFG.growth, bigMap);
+  renderGrid('ia-grid',      CFG.ia, bigMap);
+  renderGrid('value-grid',   CFG.value, bigMap);
+  renderGrid('sectors-grid', CFG.sectors, bigMap);
+
+  // DXY from bigMap
+  const dxyQ = bigMap['DX-Y.NYB'];
+  if (dxyQ) {
+    document.getElementById('dxy-val').textContent = fmt(dxyQ.price, 2);
+    const d = dir(dxyQ.changesPercentage);
+    document.getElementById('dxy-sub').innerHTML =
+      `<span class="card-change ${d}" style="font-size:.7rem">${arrow(dxyQ.changesPercentage)}${fmtPct(dxyQ.changesPercentage)}</span>`;
+  }
+
+  // VIX from bigMap
+  loadVIX(bigMap);
+
+  // Crypto + Yields in parallel
+  await Promise.all([loadCrypto(), loadYields()]);
+
+  const now = new Date();
+  document.getElementById('update-time').textContent =
+    'Actualizado: ' + now.toLocaleDateString('es-AR',{day:'2-digit',month:'short'}) +
+    ' ' + now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+
+  document.getElementById('loading').classList.add('hidden');
+  btn.disabled = false; btn.textContent = '↻ Actualizar';
+}
+
+loadAll();
+setInterval(loadAll, 5 * 60 * 1000);
+</script>
+</body>
+</html>
