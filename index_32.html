@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor Global · Ágora Asset Management</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap');
+  :root {
+    --navy:#0A192F; --gold:#D4AF37; --gold-dim:rgba(212,175,55,.18); --gold-line:rgba(212,175,55,.35);
+    --white:#FFF; --text:#E8EDF3; --muted:#8899AA; --green:#3DD68C; --red:#F76B6B;
+    --card:rgba(17,34,64,.8); --border:rgba(212,175,55,.13);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--navy);color:var(--text);font-family:'Lato',sans-serif;min-height:100vh;
+    background-image:radial-gradient(ellipse 60% 40% at 80% 5%,rgba(212,175,55,.05) 0%,transparent 60%)}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px 13px;
+    border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+    background:rgba(10,25,47,.97);backdrop-filter:blur(12px)}
+  .logo-area{display:flex;align-items:center;gap:12px}
+  .brand-name{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;letter-spacing:.07em;color:var(--white)}
+  .brand-sub{font-size:.6rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;display:block;margin-top:1px;font-weight:300}
+  .header-right{display:flex;align-items:center;gap:14px}
+  .last-update{font-size:.68rem;color:var(--muted)}
+  .pulse{display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;margin-right:5px;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  #refresh-btn{background:var(--gold-dim);border:1px solid var(--gold-line);color:var(--gold);
+    font-family:'Lato',sans-serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+    padding:6px 14px;border-radius:3px;cursor:pointer;transition:background .2s}
+  #refresh-btn:hover{background:rgba(212,175,55,.28)}
+  #refresh-btn:disabled{opacity:.35;cursor:not-allowed}
+  main{padding:20px 32px 48px;max-width:1600px;margin:0 auto}
+  .sl{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;
+    margin-bottom:10px;margin-top:26px;display:flex;align-items:center;gap:10px}
+  .sl::after{content:'';flex:1;height:1px;background:var(--border)}
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .g6{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .g8{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+  .g9{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+  .g11{display:grid;grid-template-columns:repeat(11,1fr);gap:8px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:5px;
+    padding:11px 13px;position:relative;overflow:hidden;transition:border-color .2s}
+  .card:hover{border-color:var(--gold-line)}
+  .card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);opacity:0;transition:opacity .2s}
+  .card:hover::before{opacity:1}
+  .card.up{background:linear-gradient(135deg,var(--card),rgba(61,214,140,.06))}
+  .card.dn{background:linear-gradient(135deg,var(--card),rgba(247,107,107,.06))}
+  .tk{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:2px}
+  .nm{font-size:.63rem;color:var(--muted);margin-bottom:6px;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pr{font-size:1rem;font-weight:700;color:var(--white);letter-spacing:-.01em;margin-bottom:3px;font-variant-numeric:tabular-nums}
+  .ch{font-size:.72rem;font-weight:700;letter-spacing:.02em;font-variant-numeric:tabular-nums}
+  .ch.up{color:var(--green)}.ch.dn{color:var(--red)}.ch.fl{color:var(--muted)}
+  .ab{font-size:.6rem;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+  .mc{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:13px 15px}
+  .ml{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px}
+  .mv{font-size:1.2rem;font-weight:700;color:var(--white);font-variant-numeric:tabular-nums}
+  .ms{font-size:.65rem;color:var(--muted);font-weight:300;margin-top:2px}
+  .yw{display:grid;grid-template-columns:1fr 240px;gap:8px}
+  .yb{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:14px 16px}
+  .yr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .yt{font-size:.6rem;color:var(--muted);width:28px;text-align:right}
+  .ybw{flex:1;height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+  .ybf{height:100%;background:linear-gradient(90deg,var(--gold),rgba(212,175,55,.4));border-radius:2px;transition:width .8s ease}
+  .yv{font-size:.76rem;font-weight:700;color:var(--white);width:40px;font-variant-numeric:tabular-nums}
+  .yc{font-size:.62rem;width:46px;font-variant-numeric:tabular-nums}
+  .vb{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between}
+  .vt{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--green) 0%,#FFD700 40%,#FF8C00 65%,var(--red) 100%);position:relative;margin:8px 0 5px}
+  .vn{position:absolute;top:-4px;width:3px;height:14px;background:white;border-radius:2px;transform:translateX(-50%);transition:left .8s ease;box-shadow:0 0 4px rgba(255,255,255,.7)}
+  .vl{display:flex;justify-content:space-between;font-size:.55rem;color:var(--muted)}
+  .lo{position:fixed;inset:0;background:rgba(10,25,47,.95);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+  .lo.hidden{display:none}
+  .sp{width:36px;height:36px;border:2px solid var(--gold-dim);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .lt{font-family:'Playfair Display',serif;font-size:.85rem;color:var(--muted);letter-spacing:.07em}
+  .ls{font-size:.65rem;color:rgba(136,153,170,.6);letter-spacing:.05em}
+  footer{text-align:center;padding:16px 32px;border-top:1px solid var(--border);font-size:.6rem;color:var(--muted);letter-spacing:.06em;margin-top:20px}
+  footer span{color:var(--gold)}
+  @media(max-width:1200px){.g11{grid-template-columns:repeat(6,1fr)}.g8,.g9{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(3,1fr)}.yw{grid-template-columns:1fr}}
+  @media(max-width:800px){main{padding:12px}.g11,.g9,.g8,.g6,.g5,.g4{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="lo" id="lo">
+  <svg width="34" height="34" viewBox="0 0 36 36" fill="none">
+    <polygon points="18,2 34,31 2,31" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+    <polygon points="18,9 28,28 8,28" fill="rgba(212,175,55,0.15)"/>
+  </svg>
+  <div class="sp"></div>
+  <div class="lt">Obteniendo datos de mercado…</div>
+  <div class="ls" id="ls">Conectando con Yahoo Finance</div>
+</div>
+
+<header>
+  <div class="logo-area">
+    <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+      <polygon points="18,2 34,31 2,31" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+      <polygon points="18,9 28,28 8,28" fill="rgba(212,175,55,0.15)"/>
+    </svg>
+    <div>
+      <div class="brand-name">Ágora Asset Management</div>
+      <span class="brand-sub">Monitor Global de Mercados</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="last-update"><span class="pulse"></span><span id="ut">Actualizando…</span></div>
+    <button id="refresh-btn" onclick="loadAll()">↻ Actualizar</button>
+  </div>
+</header>
+
+<main>
+  <div class="sl">Macro Flash</div>
+  <div class="g4">
+    <div class="mc"><div class="ml">Fed Funds Rate</div><div class="mv">4.25–4.50%</div><div class="ms">Tasa objetivo actual</div></div>
+    <div class="mc"><div class="ml">CPI USA (interanual)</div><div class="mv">2.4%</div><div class="ms">Mayo 2025</div></div>
+    <div class="mc"><div class="ml">Próxima reunión FOMC</div><div class="mv" style="font-size:.92rem;margin-top:3px">29–30 Jul 2025</div><div class="ms">Federal Reserve</div></div>
+    <div class="mc"><div class="ml">DXY · Índice Dólar</div><div class="mv" id="dxy-val">—</div><div class="ms" id="dxy-sub">vs canasta de monedas</div></div>
+  </div>
+
+  <div class="sl">Índices Globales & Volatilidad</div>
+  <div class="g6" id="g-idx"></div>
+
+  <div class="sl">Tasas · Treasuries USA</div>
+  <div class="yw">
+    <div class="yb">
+      <div style="font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:12px">Curva de rendimientos UST</div>
+      <div id="y-rows"></div>
+      <div id="y-spread"></div>
+    </div>
+    <div class="vb">
+      <div>
+        <div class="ml">VIX · Fear Index</div>
+        <div class="mv" id="vix-v" style="font-size:1.8rem;margin-top:5px">—</div>
+        <div id="vix-l" class="ms" style="margin-top:2px">—</div>
+      </div>
+      <div>
+        <div class="vt"><div class="vn" id="vix-n" style="left:20%"></div></div>
+        <div class="vl"><span>Calma</span><span>Moderado</span><span>Estrés</span><span>Pánico</span></div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:2px">Spread 2s10s</div>
+        <div id="sp-v" style="font-size:.95rem;font-weight:700;color:var(--white)">—</div>
+        <div class="ms">Curva de rendimientos</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sl">Commodities</div>
+  <div class="g5" id="g-com"></div>
+
+  <div class="sl">Divisas</div>
+  <div class="g4" id="g-fx"></div>
+
+  <div class="sl">Crypto</div>
+  <div class="g4" id="g-cry"></div>
+
+  <div class="sl">Growth</div>
+  <div class="g8" id="g-gro"></div>
+
+  <div class="sl">Inteligencia Artificial & Semiconductores</div>
+  <div class="g6" id="g-ia"></div>
+
+  <div class="sl">Value</div>
+  <div class="g9" id="g-val"></div>
+
+  <div class="sl">Sectores (ETFs)</div>
+  <div class="g11" id="g-sec"></div>
+</main>
+
+<footer>Ágora Asset Management · CNV AP N° 2244 · <span>Monitor informativo.</span> No constituye asesoramiento de inversión. Datos: Yahoo Finance.</footer>
+
+<script>
+// ─── CONFIG: Yahoo Finance tickers ────────────────────────────────────────────
+// Yahoo Finance permite llamadas directas desde el browser (CORS abierto)
+// Endpoint batch: /v7/finance/quote?symbols=A,B,C
+
+const SECTIONS = {
+  idx: [
+    {y:'SPY',       l:'SPY',      n:'S&P 500 ETF'},
+    {y:'QQQ',       l:'QQQ',      n:'Nasdaq ETF'},
+    {y:'DIA',       l:'DIA',      n:'Dow Jones ETF'},
+    {y:'^STOXX50E', l:'STOXX50',  n:'Euro Stoxx 50'},
+    {y:'^N225',     l:'Nikkei',   n:'Nikkei 225'},
+    {y:'^VIX',      l:'VIX',      n:'Volatilidad'},
+  ],
+  yields: [
+    {y:'^IRX', l:'3M'},
+    {y:'^FVX', l:'5Y'},
+    {y:'^TNX', l:'10Y'},
+    {y:'^TYX', l:'30Y'},
+  ],
+  com: [
+    {y:'GC=F',  l:'Oro',   n:'USD / oz'},
+    {y:'CL=F',  l:'WTI',   n:'Petróleo USD/bbl'},
+    {y:'BZ=F',  l:'Brent', n:'Petróleo USD/bbl'},
+    {y:'ZS=F',  l:'Soja',  n:'USD / bushel'},
+    {y:'SI=F',  l:'Plata', n:'USD / oz'},
+  ],
+  fx: [
+    {y:'EURUSD=X', l:'EUR/USD', n:'Euro / Dólar'},
+    {y:'GBPUSD=X', l:'GBP/USD', n:'Libra / Dólar'},
+    {y:'JPY=X',    l:'USD/JPY', n:'Dólar / Yen'},
+    {y:'BRL=X',    l:'USD/BRL', n:'Dólar / Real'},
+  ],
+  cry: [
+    {y:'BTC-USD', l:'BTC', n:'Bitcoin'},
+    {y:'ETH-USD', l:'ETH', n:'Ethereum'},
+    {y:'SOL-USD', l:'SOL', n:'Solana'},
+    {y:'XRP-USD', l:'XRP', n:'Ripple'},
+  ],
+  gro: [
+    {y:'NVDA',  l:'NVDA',  n:'Nvidia'},
+    {y:'AAPL',  l:'AAPL',  n:'Apple'},
+    {y:'GOOGL', l:'GOOGL', n:'Alphabet'},
+    {y:'MSFT',  l:'MSFT',  n:'Microsoft'},
+    {y:'AMZN',  l:'AMZN',  n:'Amazon'},
+    {y:'META',  l:'META',  n:'Meta'},
+    {y:'TSLA',  l:'TSLA',  n:'Tesla'},
+    {y:'SPCX',  l:'SPCX',  n:'SpaceX'},
+  ],
+  ia: [
+    {y:'SMH',  l:'SMH',  n:'ETF Semiconductores'},
+    {y:'MU',   l:'MU',   n:'Micron'},
+    {y:'TSM',  l:'TSM',  n:'Taiwan Semi'},
+    {y:'AMD',  l:'AMD',  n:'AMD'},
+    {y:'INTC', l:'INTC', n:'Intel'},
+    {y:'ASML', l:'ASML', n:'ASML Holding'},
+  ],
+  val: [
+    {y:'BRK-B', l:'BRK.B', n:'Berkshire Hathaway'},
+    {y:'BAC',   l:'BAC',   n:'Bank of America'},
+    {y:'DIS',   l:'DIS',   n:'Disney'},
+    {y:'HD',    l:'HD',    n:'Home Depot'},
+    {y:'JPM',   l:'JPM',   n:'JP Morgan'},
+    {y:'KO',    l:'KO',    n:'Coca-Cola'},
+    {y:'NKE',   l:'NKE',   n:'Nike'},
+    {y:'PEP',   l:'PEP',   n:'Pepsico'},
+    {y:'WMT',   l:'WMT',   n:'Walmart'},
+  ],
+  sec: [
+    {y:'XLK',  l:'XLK',  n:'Tecnología'},
+    {y:'XLY',  l:'XLY',  n:'Consumo Discr.'},
+    {y:'XLB',  l:'XLB',  n:'Materiales'},
+    {y:'XLI',  l:'XLI',  n:'Industrial'},
+    {y:'XLV',  l:'XLV',  n:'Salud'},
+    {y:'XLU',  l:'XLU',  n:'Utilities'},
+    {y:'XLP',  l:'XLP',  n:'Consumo Básico'},
+    {y:'XLE',  l:'XLE',  n:'Energía'},
+    {y:'XLF',  l:'XLF',  n:'Financiero'},
+    {y:'XLRE', l:'XLRE', n:'Real Estate'},
+    {y:'XLC',  l:'XLC',  n:'Comunicación'},
+  ],
+};
+
+// DXY ticker en Yahoo Finance
+const DXY_TICKER = 'DX-Y.NYB';
+// 2Y yield (Yahoo usa este símbolo)
+const Y2_TICKER = '^UST2Y'; // fallback: usamos FVX como 2Y approx
+
+// ─── FETCH BATCH YAHOO ────────────────────────────────────────────────────────
+async function yahooFetch(symbols) {
+  const syms = symbols.join(',');
+  // Yahoo Finance v7 quote endpoint — permite CORS desde cualquier origen
+  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&lang=en-US&region=US&corsDomain=finance.yahoo.com`;
+  try {
+    const r = await fetch(url, {
+      headers: { 'Accept': 'application/json' },
+      signal: AbortSignal.timeout(15000)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const quotes = data?.quoteResponse?.result ?? [];
+    const map = {};
+    for (const q of quotes) map[q.symbol] = q;
+    return map;
+  } catch(e) {
+    console.error('Yahoo fetch failed:', e, 'symbols:', syms);
+    return {};
+  }
+}
+
+// ─── FORMAT ───────────────────────────────────────────────────────────────────
+function f(n, d=2) {
+  if (n==null||isNaN(n)) return '—';
+  return new Intl.NumberFormat('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);
+}
+function fp(n) { if (n==null||isNaN(n)) return '—'; return (n>=0?'+':'')+f(n,2)+'%'; }
+function dc(n) { return n==null||isNaN(n)?'fl':n>0.05?'up':n<-0.05?'dn':'fl'; }
+function ar(n) { return n>0.05?'▲ ':n<-0.05?'▼ ':'— '; }
+
+// ─── CARD ─────────────────────────────────────────────────────────────────────
+function card(l, n, price, pct, abs) {
+  const d = dc(pct);
+  const dec = price!=null&&price<10?4:2;
+  return `<div class="card ${d}">
+    <div class="tk">${l}</div>
+    <div class="nm">${n}</div>
+    <div class="pr">${price!=null?f(price,dec):'—'}</div>
+    <div class="ch ${d}">${price!=null?ar(pct)+fp(pct):'Sin datos'}</div>
+    ${abs!=null&&price!=null?`<div class="ab">${abs>=0?'+':''}${f(abs,2)}</div>`:''}
+  </div>`;
+}
+
+function renderSection(id, cfg, map) {
+  document.getElementById(id).innerHTML = cfg.map(c => {
+    const q = map[c.y];
+    const price = q?.regularMarketPrice;
+    const pct   = q?.regularMarketChangePercent;
+    const abs   = q?.regularMarketChange;
+    return card(c.l, c.n, price, pct, abs);
+  }).join('');
+}
+
+// ─── LOAD ALL ─────────────────────────────────────────────────────────────────
+async function loadAll() {
+  const btn = document.getElementById('refresh-btn');
+  btn.disabled = true; btn.textContent = '↻ Cargando…';
+  document.getElementById('lo').classList.remove('hidden');
+  document.getElementById('ls').textContent = 'Conectando con Yahoo Finance…';
+
+  // Juntar TODOS los símbolos Yahoo en un array único
+  const allSymbols = [
+    ...Object.values(SECTIONS).flat().map(c => c.y),
+    DXY_TICKER,
+  ];
+  // Deduplicar
+  const unique = [...new Set(allSymbols)];
+
+  // Yahoo acepta hasta ~100 símbolos por llamada — los mandamos en 2 batches
+  const mid  = Math.ceil(unique.length / 2);
+  const b1   = unique.slice(0, mid);
+  const b2   = unique.slice(mid);
+
+  document.getElementById('ls').textContent = `Cargando ${unique.length} instrumentos en 2 llamadas…`;
+
+  const [map1, map2] = await Promise.all([
+    yahooFetch(b1),
+    yahooFetch(b2),
+  ]);
+  const MAP = { ...map1, ...map2 };
+
+  console.log('Yahoo map keys:', Object.keys(MAP));
+
+  // Renderizar secciones
+  renderSection('g-idx', SECTIONS.idx, MAP);
+  renderSection('g-com', SECTIONS.com, MAP);
+  renderSection('g-fx',  SECTIONS.fx,  MAP);
+  renderSection('g-cry', SECTIONS.cry, MAP);
+  renderSection('g-gro', SECTIONS.gro, MAP);
+  renderSection('g-ia',  SECTIONS.ia,  MAP);
+  renderSection('g-val', SECTIONS.val, MAP);
+  renderSection('g-sec', SECTIONS.sec, MAP);
+
+  // DXY
+  const dxy = MAP[DXY_TICKER];
+  if (dxy?.regularMarketPrice) {
+    document.getElementById('dxy-val').textContent = f(dxy.regularMarketPrice, 2);
+    const d = dc(dxy.regularMarketChangePercent);
+    document.getElementById('dxy-sub').innerHTML =
+      `<span class="ch ${d}" style="font-size:.7rem">${ar(dxy.regularMarketChangePercent)}${fp(dxy.regularMarketChangePercent)}</span>`;
+  }
+
+  // VIX
+  const vix = MAP['^VIX'];
+  if (vix?.regularMarketPrice) {
+    const v = vix.regularMarketPrice;
+    document.getElementById('vix-v').textContent = f(v, 1);
+    const lbl = v<15?'😌 Mercado calmo':v<20?'🟡 Volatilidad moderada':v<30?'🟠 Estrés de mercado':'🔴 Alta volatilidad — Pánico';
+    document.getElementById('vix-l').textContent = lbl;
+    document.getElementById('vix-l').className = 'ms ch '+dc(vix.regularMarketChangePercent);
+    document.getElementById('vix-n').style.left = Math.min(100,Math.max(0,(v-10)/40*100))+'%';
+  }
+
+  // Yields
+  const yData = SECTIONS.yields.map(y => ({
+    ...y,
+    price: MAP[y.y]?.regularMarketPrice ?? null,
+    pct:   MAP[y.y]?.regularMarketChangePercent ?? null,
+  }));
+  const maxY = Math.max(...yData.map(y=>y.price).filter(Boolean));
+  document.getElementById('y-rows').innerHTML = yData.map(y => {
+    const bar = maxY>0&&y.price!=null?(y.price/maxY*100):0;
+    const d = dc(y.pct);
+    return `<div class="yr">
+      <div class="yt">${y.l}</div>
+      <div class="ybw"><div class="ybf" style="width:${bar}%"></div></div>
+      <div class="yv">${y.price!=null?f(y.price,2)+'%':'—'}</div>
+      <span class="yc ch ${d}">${y.price!=null?fp(y.pct):''}</span>
+    </div>`;
+  }).join('');
+
+  // Spread: 10Y minus 3M (ambos disponibles en Yahoo)
+  const y3m  = MAP['^IRX']?.regularMarketPrice;
+  const y10  = MAP['^TNX']?.regularMarketPrice;
+  if (y3m!=null && y10!=null) {
+    const sp = (y10 - y3m)*100, d = dc(sp);
+    document.getElementById('y-spread').innerHTML =
+      `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700">Spread 3M–10Y</span>
+        <span class="ch ${d}" style="font-size:.85rem">${sp>=0?'+':''}${f(sp,0)} pb</span>
+      </div>`;
+    document.getElementById('sp-v').textContent = (sp>=0?'+':'')+f(sp,0)+' pb';
+    document.getElementById('sp-v').className = 'ch '+d;
+  }
+
+  const now = new Date();
+  document.getElementById('ut').textContent =
+    'Actualizado: '+now.toLocaleDateString('es-AR',{day:'2-digit',month:'short'})+
+    ' '+now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+
+  document.getElementById('lo').classList.add('hidden');
+  btn.disabled=false; btn.textContent='↻ Actualizar';
+}
+
+loadAll();
+setInterval(loadAll, 10*60*1000);
+</script>
+</body>
+</html>
