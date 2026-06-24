@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor Global · Ágora Asset Management</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Lato:wght@300;400;700&display=swap');
+  :root {
+    --navy:#0A192F; --gold:#D4AF37; --gold-dim:rgba(212,175,55,.18); --gold-line:rgba(212,175,55,.35);
+    --white:#FFF; --text:#E8EDF3; --muted:#8899AA; --green:#3DD68C; --red:#F76B6B;
+    --card:rgba(17,34,64,.8); --border:rgba(212,175,55,.13);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--navy);color:var(--text);font-family:'Lato',sans-serif;min-height:100vh;
+    background-image:radial-gradient(ellipse 60% 40% at 80% 5%,rgba(212,175,55,.05) 0%,transparent 60%)}
+  header{display:flex;align-items:center;justify-content:space-between;padding:16px 32px 13px;
+    border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100;
+    background:rgba(10,25,47,.97);backdrop-filter:blur(12px)}
+  .logo-area{display:flex;align-items:center;gap:12px}
+  .brand-name{font-family:'Playfair Display',serif;font-size:1.05rem;font-weight:600;letter-spacing:.07em;color:var(--white)}
+  .brand-sub{font-size:.6rem;letter-spacing:.18em;color:var(--gold);text-transform:uppercase;display:block;margin-top:1px;font-weight:300}
+  .header-right{display:flex;align-items:center;gap:14px}
+  .last-update{font-size:.68rem;color:var(--muted)}
+  .pulse{display:inline-block;width:6px;height:6px;background:var(--green);border-radius:50%;margin-right:5px;animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+  #refresh-btn{background:var(--gold-dim);border:1px solid var(--gold-line);color:var(--gold);
+    font-family:'Lato',sans-serif;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;
+    padding:6px 14px;border-radius:3px;cursor:pointer;transition:background .2s}
+  #refresh-btn:hover{background:rgba(212,175,55,.28)}
+  #refresh-btn:disabled{opacity:.35;cursor:not-allowed}
+  main{padding:20px 32px 48px;max-width:1600px;margin:0 auto}
+  .sl{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);font-weight:700;
+    margin-bottom:10px;margin-top:26px;display:flex;align-items:center;gap:10px}
+  .sl::after{content:'';flex:1;height:1px;background:var(--border)}
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .g5{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+  .g6{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .g8{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+  .g9{display:grid;grid-template-columns:repeat(9,1fr);gap:8px}
+  .g11{display:grid;grid-template-columns:repeat(11,1fr);gap:8px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:5px;
+    padding:11px 13px;position:relative;overflow:hidden;transition:border-color .2s}
+  .card:hover{border-color:var(--gold-line)}
+  .card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);opacity:0;transition:opacity .2s}
+  .card:hover::before{opacity:1}
+  .card.up{background:linear-gradient(135deg,var(--card),rgba(61,214,140,.06))}
+  .card.dn{background:linear-gradient(135deg,var(--card),rgba(247,107,107,.06))}
+  .tk{font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:2px}
+  .nm{font-size:.63rem;color:var(--muted);margin-bottom:6px;font-weight:300;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pr{font-size:1rem;font-weight:700;color:var(--white);letter-spacing:-.01em;margin-bottom:3px;font-variant-numeric:tabular-nums}
+  .ch{font-size:.72rem;font-weight:700;font-variant-numeric:tabular-nums}
+  .ch.up{color:var(--green)}.ch.dn{color:var(--red)}.ch.fl{color:var(--muted)}
+  .ab{font-size:.6rem;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+  .src{font-size:.48rem;color:rgba(136,153,170,.35);letter-spacing:.08em;text-transform:uppercase;margin-top:3px}
+  .mc{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:13px 15px}
+  .ml{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:4px}
+  .mv{font-size:1.2rem;font-weight:700;color:var(--white);font-variant-numeric:tabular-nums}
+  .ms{font-size:.65rem;color:var(--muted);font-weight:300;margin-top:2px}
+  .yw{display:grid;grid-template-columns:1fr 240px;gap:8px}
+  .yb{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:14px 16px}
+  .yr{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+  .yt{font-size:.6rem;color:var(--muted);width:28px;text-align:right}
+  .ybw{flex:1;height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden}
+  .ybf{height:100%;background:linear-gradient(90deg,var(--gold),rgba(212,175,55,.4));border-radius:2px;transition:width .8s ease}
+  .yv{font-size:.76rem;font-weight:700;color:var(--white);width:40px;font-variant-numeric:tabular-nums}
+  .yc{font-size:.62rem;width:46px;font-variant-numeric:tabular-nums}
+  .vb{background:var(--card);border:1px solid var(--border);border-radius:5px;padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between}
+  .vt{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--green) 0%,#FFD700 40%,#FF8C00 65%,var(--red) 100%);position:relative;margin:8px 0 5px}
+  .vn{position:absolute;top:-4px;width:3px;height:14px;background:white;border-radius:2px;transform:translateX(-50%);transition:left .8s ease;box-shadow:0 0 4px rgba(255,255,255,.7)}
+  .vl{display:flex;justify-content:space-between;font-size:.55rem;color:var(--muted)}
+  .lo{position:fixed;inset:0;background:rgba(10,25,47,.95);z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+  .lo.hidden{display:none}
+  .sp{width:36px;height:36px;border:2px solid var(--gold-dim);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .lt{font-family:'Playfair Display',serif;font-size:.85rem;color:var(--muted);letter-spacing:.07em}
+  .ls{font-size:.65rem;color:rgba(136,153,170,.5);letter-spacing:.05em}
+  footer{text-align:center;padding:16px 32px;border-top:1px solid var(--border);font-size:.6rem;color:var(--muted);letter-spacing:.06em;margin-top:20px}
+  footer span{color:var(--gold)}
+  @media(max-width:1200px){.g11{grid-template-columns:repeat(6,1fr)}.g8,.g9{grid-template-columns:repeat(4,1fr)}.g6{grid-template-columns:repeat(3,1fr)}.yw{grid-template-columns:1fr}}
+  @media(max-width:800px){main{padding:12px}.g11,.g9,.g8,.g6,.g5,.g4{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+
+<div class="lo" id="lo">
+  <svg width="34" height="34" viewBox="0 0 36 36" fill="none">
+    <polygon points="18,2 34,31 2,31" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+    <polygon points="18,9 28,28 8,28" fill="rgba(212,175,55,0.15)"/>
+  </svg>
+  <div class="sp"></div>
+  <div class="lt">Obteniendo datos de mercado…</div>
+  <div class="ls" id="ls">Iniciando</div>
+</div>
+
+<header>
+  <div class="logo-area">
+    <svg width="32" height="32" viewBox="0 0 36 36" fill="none">
+      <polygon points="18,2 34,31 2,31" fill="none" stroke="#D4AF37" stroke-width="1.5"/>
+      <polygon points="18,9 28,28 8,28" fill="rgba(212,175,55,0.15)"/>
+    </svg>
+    <div>
+      <div class="brand-name">Ágora Asset Management</div>
+      <span class="brand-sub">Monitor Global de Mercados</span>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="last-update"><span class="pulse"></span><span id="ut">Actualizando…</span></div>
+    <button id="refresh-btn" onclick="loadAll()">↻ Actualizar</button>
+  </div>
+</header>
+
+<main>
+  <div class="sl">Macro Flash</div>
+  <div class="g4">
+    <div class="mc"><div class="ml">Fed Funds Rate</div><div class="mv">4.25–4.50%</div><div class="ms">Tasa objetivo actual</div></div>
+    <div class="mc"><div class="ml">CPI USA (interanual)</div><div class="mv">2.4%</div><div class="ms">Mayo 2025</div></div>
+    <div class="mc"><div class="ml">Próxima reunión FOMC</div><div class="mv" style="font-size:.92rem;margin-top:3px">29–30 Jul 2025</div><div class="ms">Federal Reserve</div></div>
+    <div class="mc"><div class="ml">DXY · Índice Dólar</div><div class="mv" id="dxy-val">—</div><div class="ms" id="dxy-sub">vs canasta de monedas</div></div>
+  </div>
+
+  <div class="sl">Índices Globales & Volatilidad</div>
+  <div class="g6" id="g-idx"></div>
+
+  <div class="sl">Tasas · Treasuries USA</div>
+  <div class="yw">
+    <div class="yb">
+      <div style="font-size:.58rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;margin-bottom:12px">Curva de rendimientos UST · Yahoo Finance</div>
+      <div id="y-rows"></div>
+      <div id="y-spread"></div>
+    </div>
+    <div class="vb">
+      <div>
+        <div class="ml">VIX · Fear Index</div>
+        <div class="mv" id="vix-v" style="font-size:1.8rem;margin-top:5px">—</div>
+        <div id="vix-l" class="ms" style="margin-top:2px">—</div>
+      </div>
+      <div>
+        <div class="vt"><div class="vn" id="vix-n" style="left:20%"></div></div>
+        <div class="vl"><span>Calma</span><span>Moderado</span><span>Estrés</span><span>Pánico</span></div>
+      </div>
+      <div>
+        <div class="ml" style="margin-bottom:2px">Spread 3M–10Y</div>
+        <div id="sp-v" style="font-size:.95rem;font-weight:700;color:var(--white)">—</div>
+        <div class="ms">Curva de rendimientos</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="sl">Commodities</div>
+  <div class="g5" id="g-com"></div>
+
+  <div class="sl">Divisas</div>
+  <div class="g4" id="g-fx"></div>
+
+  <div class="sl">Crypto</div>
+  <div class="g4" id="g-cry"></div>
+
+  <div class="sl">Growth</div>
+  <div class="g8" id="g-gro"></div>
+
+  <div class="sl">Inteligencia Artificial & Semiconductores</div>
+  <div class="g6" id="g-ia"></div>
+
+  <div class="sl">Value</div>
+  <div class="g9" id="g-val"></div>
+
+  <div class="sl">Sectores (ETFs)</div>
+  <div class="g11" id="g-sec"></div>
+</main>
+
+<footer>Ágora Asset Management · CNV AP N° 2244 · <span>Monitor informativo.</span> No constituye asesoramiento de inversión. Datos: Finnhub (acciones/ETFs/crypto/forex) · Yahoo Finance (índices/tasas/commodities).</footer>
+
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// FUENTES:
+//   Finnhub  → US stocks, ETFs, sector ETFs, crypto (BINANCE:), forex rates
+//   Yahoo Finance → índices globales (STOXX50/Nikkei), VIX, yields, commodities, DXY
+//
+// Finnhub API doc: https://finnhub.io/docs/api
+//   GET /api/v1/quote?symbol=AAPL&token=KEY
+//     Response: { c: price, d: change, dp: changePct, h: high, l: low, o: open, pc: prevClose, t: timestamp }
+//   GET /api/v1/forex/rates?base=USD&token=KEY
+//     Response: { base: "USD", quote: { EUR: 0.92, JPY: 149.5, ... } }
+//   Rate limit free: 60 calls/min — CORS: abierto (Access-Control-Allow-Origin: *)
+// ─────────────────────────────────────────────────────────────────────────────
+
+const FH_KEY = 'd8tsf91r01qhcnk68a20d8tsf91r01qhcnk68a2g';
+const FH_BASE = 'https://finnhub.io/api/v1';
+
+// ── Finnhub: quote individual (CORS abierto) ──────────────────────────────────
+async function fhQuote(symbol) {
+  try {
+    const r = await fetch(`${FH_BASE}/quote?symbol=${encodeURIComponent(symbol)}&token=${FH_KEY}`,
+      { signal: AbortSignal.timeout(10000) });
+    if (!r.ok) return null;
+    const d = await r.json();
+    if (!d.c || d.c === 0) return null;
+    // c=current, d=change, dp=changePct, pc=prevClose
+    return { price: d.c, change: d.d, changePct: d.dp };
+  } catch(e) { return null; }
+}
+
+// ── Finnhub: forex/rates — todos los pares en una sola llamada ────────────────
+// Returns { EUR: 0.92, JPY: 149.5, BRL: 5.1, GBP: 0.79, ... } (base USD)
+async function fhForexRates() {
+  try {
+    const r = await fetch(`${FH_BASE}/forex/rates?base=USD&token=${FH_KEY}`,
+      { signal: AbortSignal.timeout(10000) });
+    if (!r.ok) return {};
+    const d = await r.json();
+    return d.quote || {};
+  } catch(e) { return {}; }
+}
+
+// ── Yahoo Finance: batch quote — CORS abierto ─────────────────────────────────
+async function yahooQuoteBatch(symbols) {
+  try {
+    const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbols.join(','))}&lang=en-US&region=US&corsDomain=finance.yahoo.com`;
+    const r = await fetch(url, { signal: AbortSignal.timeout(12000) });
+    if (!r.ok) throw new Error(r.status);
+    const data = await r.json();
+    const map = {};
+    for (const q of (data?.quoteResponse?.result ?? [])) {
+      map[q.symbol] = {
+        price: q.regularMarketPrice,
+        change: q.regularMarketChange,
+        changePct: q.regularMarketChangePercent,
+      };
+    }
+    return map;
+  } catch(e) { console.warn('Yahoo batch failed:', e); return {}; }
+}
+
+// ── FORMAT ────────────────────────────────────────────────────────────────────
+function f(n, d=2) {
+  if (n==null||isNaN(n)) return '—';
+  return new Intl.NumberFormat('es-AR',{minimumFractionDigits:d,maximumFractionDigits:d}).format(n);
+}
+function fp(n) { if (n==null||isNaN(n)) return '—'; return (n>=0?'+':'')+f(n,2)+'%'; }
+function dc(n) { return n==null||isNaN(n)?'fl':n>0.05?'up':n<-0.05?'dn':'fl'; }
+function ar(n) { return n>0.05?'▲ ':n<-0.05?'▼ ':'— '; }
+
+// ── CARD ──────────────────────────────────────────────────────────────────────
+function card(label, name, price, changePct, change, src='FH') {
+  const d = dc(changePct);
+  const dec = price!=null&&price<10?4:2;
+  const srcLabel = src==='YF'
+    ? `<div class="src">Yahoo Finance</div>`
+    : `<div class="src">Finnhub</div>`;
+  return `<div class="card ${d}">
+    <div class="tk">${label}</div>
+    <div class="nm">${name}</div>
+    <div class="pr">${price!=null?f(price,dec):'—'}</div>
+    <div class="ch ${d}">${price!=null?ar(changePct)+fp(changePct):'Sin datos'}</div>
+    ${change!=null&&price!=null?`<div class="ab">${change>=0?'+':''}${f(change,2)}</div>`:''}
+    ${srcLabel}
+  </div>`;
+}
+
+// ── SECCIONES CONFIG ──────────────────────────────────────────────────────────
+
+// Finnhub symbols para stocks/ETFs
+const FH_STOCKS = [
+  // Growth
+  {id:'NVDA',  l:'NVDA',  n:'Nvidia',             sec:'gro'},
+  {id:'AAPL',  l:'AAPL',  n:'Apple',              sec:'gro'},
+  {id:'GOOGL', l:'GOOGL', n:'Alphabet',           sec:'gro'},
+  {id:'MSFT',  l:'MSFT',  n:'Microsoft',          sec:'gro'},
+  {id:'AMZN',  l:'AMZN',  n:'Amazon',             sec:'gro'},
+  {id:'META',  l:'META',  n:'Meta',               sec:'gro'},
+  {id:'TSLA',  l:'TSLA',  n:'Tesla',              sec:'gro'},
+  {id:'SPCX',  l:'SPCX',  n:'SpaceX',            sec:'gro'},
+  // IA / Semis
+  {id:'SMH',   l:'SMH',   n:'ETF Semiconductores',sec:'ia'},
+  {id:'MU',    l:'MU',    n:'Micron',             sec:'ia'},
+  {id:'TSM',   l:'TSM',   n:'Taiwan Semi',        sec:'ia'},
+  {id:'AMD',   l:'AMD',   n:'AMD',                sec:'ia'},
+  {id:'INTC',  l:'INTC',  n:'Intel',              sec:'ia'},
+  {id:'ASML',  l:'ASML',  n:'ASML Holding',       sec:'ia'},
+  // Value
+  {id:'BRK-B', l:'BRK.B', n:'Berkshire Hathaway', sec:'val'},
+  {id:'BAC',   l:'BAC',   n:'Bank of America',    sec:'val'},
+  {id:'DIS',   l:'DIS',   n:'Disney',             sec:'val'},
+  {id:'HD',    l:'HD',    n:'Home Depot',          sec:'val'},
+  {id:'JPM',   l:'JPM',   n:'JP Morgan',           sec:'val'},
+  {id:'KO',    l:'KO',    n:'Coca-Cola',           sec:'val'},
+  {id:'NKE',   l:'NKE',   n:'Nike',               sec:'val'},
+  {id:'PEP',   l:'PEP',   n:'Pepsico',            sec:'val'},
+  {id:'WMT',   l:'WMT',   n:'Walmart',            sec:'val'},
+  // Index ETFs
+  {id:'SPY',   l:'SPY',   n:'S&P 500 ETF',        sec:'idx'},
+  {id:'QQQ',   l:'QQQ',   n:'Nasdaq ETF',         sec:'idx'},
+  {id:'DIA',   l:'DIA',   n:'Dow Jones ETF',      sec:'idx'},
+  // Sector ETFs
+  {id:'XLK',   l:'XLK',   n:'Tecnología',         sec:'sec'},
+  {id:'XLY',   l:'XLY',   n:'Consumo Discr.',     sec:'sec'},
+  {id:'XLB',   l:'XLB',   n:'Materiales',         sec:'sec'},
+  {id:'XLI',   l:'XLI',   n:'Industrial',         sec:'sec'},
+  {id:'XLV',   l:'XLV',   n:'Salud',              sec:'sec'},
+  {id:'XLU',   l:'XLU',   n:'Utilities',          sec:'sec'},
+  {id:'XLP',   l:'XLP',   n:'Consumo Básico',     sec:'sec'},
+  {id:'XLE',   l:'XLE',   n:'Energía',            sec:'sec'},
+  {id:'XLF',   l:'XLF',   n:'Financiero',         sec:'sec'},
+  {id:'XLRE',  l:'XLRE',  n:'Real Estate',        sec:'sec'},
+  {id:'XLC',   l:'XLC',   n:'Comunicación',       sec:'sec'},
+];
+
+// Finnhub crypto (exchange:symbol)
+const FH_CRYPTO = [
+  {id:'BINANCE:BTCUSDT', l:'BTC', n:'Bitcoin'},
+  {id:'BINANCE:ETHUSDT', l:'ETH', n:'Ethereum'},
+  {id:'BINANCE:SOLUSDT', l:'SOL', n:'Solana'},
+  {id:'BINANCE:XRPUSDT', l:'XRP', n:'Ripple'},
+];
+
+// Yahoo Finance symbols
+const YF_INTL_IDX = [
+  {id:'^STOXX50E', l:'STOXX50', n:'Euro Stoxx 50'},
+  {id:'^N225',     l:'Nikkei',  n:'Nikkei 225'},
+  {id:'^VIX',      l:'VIX',     n:'Volatilidad'},
+];
+const YF_YIELDS = [
+  {id:'^IRX', l:'3M'}, {id:'^FVX', l:'5Y'},
+  {id:'^TNX', l:'10Y'}, {id:'^TYX', l:'30Y'},
+];
+const YF_COMM = [
+  {id:'GC=F',  l:'Oro',   n:'USD / oz'},
+  {id:'CL=F',  l:'WTI',   n:'Petróleo USD/bbl'},
+  {id:'BZ=F',  l:'Brent', n:'Petróleo USD/bbl'},
+  {id:'ZS=F',  l:'Soja',  n:'USD / bushel'},
+  {id:'SI=F',  l:'Plata', n:'USD / oz'},
+];
+
+// ── LOAD ALL ──────────────────────────────────────────────────────────────────
+async function loadAll() {
+  const btn = document.getElementById('refresh-btn');
+  btn.disabled=true; btn.textContent='↻ Cargando…';
+  document.getElementById('lo').classList.remove('hidden');
+  document.getElementById('ls').textContent='Conectando con Finnhub y Yahoo Finance…';
+
+  // Todos los Yahoo symbols en un solo batch
+  const yfSymbols = [
+    ...YF_INTL_IDX.map(x=>x.id),
+    ...YF_YIELDS.map(x=>x.id),
+    ...YF_COMM.map(x=>x.id),
+    'DX-Y.NYB', // DXY
+  ];
+
+  // Finnhub: disparar todos los quotes de stocks en paralelo + forex rates + crypto
+  document.getElementById('ls').textContent=`Cargando ${FH_STOCKS.length} instrumentos via Finnhub + Yahoo Finance…`;
+
+  const [
+    fhResults,      // Array con resultados de cada stock
+    fhCryptoResults,// Array de crypto
+    fhForex,        // { EUR: 0.92, JPY: 149, ... }
+    yfMap,          // { '^STOXX50E': {...}, '^VIX': {...}, ... }
+  ] = await Promise.all([
+    Promise.all(FH_STOCKS.map(s => fhQuote(s.id))),
+    Promise.all(FH_CRYPTO.map(s => fhQuote(s.id))),
+    fhForexRates(),
+    yahooQuoteBatch(yfSymbols),
+  ]);
+
+  // Mapear resultados Finnhub stocks
+  const fhMap = {};
+  FH_STOCKS.forEach((s,i) => { if (fhResults[i]) fhMap[s.id] = fhResults[i]; });
+
+  // ── Renderizar secciones Finnhub ────────────────────────────────────────────
+  const renderFH = (gridId, secKey) => {
+    const items = FH_STOCKS.filter(s=>s.sec===secKey);
+    document.getElementById(gridId).innerHTML = items.map(s => {
+      const q = fhMap[s.id];
+      return card(s.l, s.n, q?.price, q?.changePct, q?.change, 'FH');
+    }).join('');
+  };
+
+  renderFH('g-gro','gro');
+  renderFH('g-ia', 'ia');
+  renderFH('g-val','val');
+  renderFH('g-sec','sec');
+
+  // ── Índices: ETFs (FH) + internacionales (YF) ───────────────────────────────
+  const idxFH = FH_STOCKS.filter(s=>s.sec==='idx');
+  const idxCards = [
+    ...idxFH.map(s => {
+      const q = fhMap[s.id];
+      return card(s.l, s.n, q?.price, q?.changePct, q?.change, 'FH');
+    }),
+    ...YF_INTL_IDX.map(s => {
+      const q = yfMap[s.id];
+      return card(s.l, s.n, q?.price, q?.changePct, q?.change, 'YF');
+    }),
+  ];
+  document.getElementById('g-idx').innerHTML = idxCards.join('');
+
+  // ── Commodities (Yahoo Finance) ─────────────────────────────────────────────
+  document.getElementById('g-com').innerHTML = YF_COMM.map(s => {
+    const q = yfMap[s.id];
+    return card(s.l, s.n, q?.price, q?.changePct, q?.change, 'YF');
+  }).join('');
+
+  // ── Forex (Finnhub forex/rates) ─────────────────────────────────────────────
+  // fhForex tiene { EUR: 0.9174, JPY: 149.5, BRL: 5.1, GBP: 0.787 } (base USD)
+  // EUR/USD = 1 / fhForex.EUR ; GBP/USD = 1 / fhForex.GBP
+  // USD/JPY = fhForex.JPY    ; USD/BRL = fhForex.BRL
+  const fxPairs = [
+    { l:'EUR/USD', n:'Euro / Dólar',    price: fhForex.EUR ? 1/fhForex.EUR : null },
+    { l:'GBP/USD', n:'Libra / Dólar',   price: fhForex.GBP ? 1/fhForex.GBP : null },
+    { l:'USD/JPY', n:'Dólar / Yen',     price: fhForex.JPY ?? null },
+    { l:'USD/BRL', n:'Dólar / Real',    price: fhForex.BRL ?? null },
+  ];
+  // Finnhub forex/rates no retorna cambio diario, mostramos solo precio
+  document.getElementById('g-fx').innerHTML = fxPairs.map(p =>
+    card(p.l, p.n, p.price, null, null, 'FH')
+  ).join('');
+
+  // ── Crypto (Finnhub BINANCE:) ────────────────────────────────────────────────
+  document.getElementById('g-cry').innerHTML = FH_CRYPTO.map((s,i) => {
+    const q = fhCryptoResults[i];
+    return card(s.l, s.n, q?.price, q?.changePct, q?.change, 'FH');
+  }).join('');
+
+  // ── DXY (Yahoo Finance) ──────────────────────────────────────────────────────
+  const dxy = yfMap['DX-Y.NYB'];
+  if (dxy?.price) {
+    document.getElementById('dxy-val').textContent = f(dxy.price, 2);
+    const d = dc(dxy.changePct);
+    document.getElementById('dxy-sub').innerHTML =
+      `<span class="ch ${d}" style="font-size:.7rem">${ar(dxy.changePct)}${fp(dxy.changePct)}</span>`;
+  }
+
+  // ── Yields (Yahoo Finance) ───────────────────────────────────────────────────
+  const yData = YF_YIELDS.map(y => ({ ...y, ...yfMap[y.id] }));
+  const maxY  = Math.max(...yData.map(y=>y.price).filter(Boolean));
+  document.getElementById('y-rows').innerHTML = yData.map(y => {
+    const bar = maxY>0&&y.price!=null?(y.price/maxY*100):0;
+    const d = dc(y.changePct);
+    return `<div class="yr">
+      <div class="yt">${y.l}</div>
+      <div class="ybw"><div class="ybf" style="width:${bar}%"></div></div>
+      <div class="yv">${y.price!=null?f(y.price,2)+'%':'—'}</div>
+      <span class="yc ch ${d}">${y.price!=null?fp(y.changePct):''}</span>
+    </div>`;
+  }).join('');
+
+  const y3m = yfMap['^IRX']?.price, y10 = yfMap['^TNX']?.price;
+  if (y3m!=null&&y10!=null) {
+    const sp=(y10-y3m)*100, d=dc(sp);
+    document.getElementById('y-spread').innerHTML =
+      `<div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:.58rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700">Spread 3M–10Y</span>
+        <span class="ch ${d}" style="font-size:.85rem">${sp>=0?'+':''}${f(sp,0)} pb</span>
+      </div>`;
+    document.getElementById('sp-v').textContent = (sp>=0?'+':'')+f(sp,0)+' pb';
+    document.getElementById('sp-v').className = 'ch '+d;
+  }
+
+  // ── VIX (Yahoo Finance) ──────────────────────────────────────────────────────
+  const vix = yfMap['^VIX'];
+  if (vix?.price) {
+    const v = vix.price;
+    document.getElementById('vix-v').textContent = f(v,1);
+    const lbl = v<15?'😌 Mercado calmo':v<20?'🟡 Volatilidad moderada':v<30?'🟠 Estrés de mercado':'🔴 Alta volatilidad — Pánico';
+    document.getElementById('vix-l').textContent = lbl;
+    document.getElementById('vix-l').className = 'ms ch '+dc(vix.changePct);
+    document.getElementById('vix-n').style.left = Math.min(100,Math.max(0,(v-10)/40*100))+'%';
+  }
+
+  const now = new Date();
+  document.getElementById('ut').textContent =
+    'Actualizado: '+now.toLocaleDateString('es-AR',{day:'2-digit',month:'short'})+
+    ' '+now.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
+
+  document.getElementById('lo').classList.add('hidden');
+  btn.disabled=false; btn.textContent='↻ Actualizar';
+}
+
+loadAll();
+setInterval(loadAll, 10*60*1000);
+</script>
+</body>
+</html>
